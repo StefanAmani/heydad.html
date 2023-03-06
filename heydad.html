@@ -1,54 +1,48 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Hey Dad</title>
+    <title>Hey Dad Chatbot</title>
   </head>
   <body>
-    <h1>Hey Dad</h1>
-    <p>Welcome to Hey Dad, the chatbot designed to help you with the things a dad would.</p>
-    <p>Whether you're looking for advice on changing a tire, grilling the perfect steak, or just need someone to listen, Hey Dad is here for you.</p>
-    <form method="POST">
+    <h1>Hey Dad Chatbot</h1>
+    <p>Hi there! I'm Hey Dad, your virtual dad. My objective is to teach you things a dad would. Feel free to ask me anything!</p>
+    <form>
       <label for="user_input">Enter your message:</label>
       <input type="text" id="user_input" name="user_input">
-      <button type="submit">Send</button>
+      <button type="submit" onclick="getResponse()">Send</button>
     </form>
-    {% if response_text %}
-      <div>
-        <p><strong>Hey Dad:</strong> {{ response_text }}</p>
-      </div>
-    {% endif %}
+    <div id="response_area"></div>
+
+    <script src="https://cdn.openai.com/sdk/js/0.1.0/openai.js"></script>
+    <script>
+      const openai = new OpenAI(api_key="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");
+
+      function getResponse() {
+        const user_input = document.getElementById('user_input').value;
+
+        openai.complete({
+          engine: "text-davinci-002",
+          prompt: user_input,
+          maxTokens: 150,
+          n: 1,
+          stop: "\n",
+          temperature: 0.5,
+        })
+        .then(response => {
+          const response_text = response.data.choices[0].text.trim();
+          addResponse(response_text);
+        })
+        .catch(error => {
+          console.log(error);
+          addResponse("I'm sorry, I couldn't understand that.");
+        });
+      }
+
+      function addResponse(text) {
+        const response_area = document.getElementById('response_area');
+        response_area.innerHTML += '<p><strong>Hey Dad:</strong> ' + text + '</p>';
+        document.getElementById('user_input').value = '';
+      }
+    </script>
   </body>
 </html>
-
-<script>
-  const form = document.querySelector('form');
-  const input = document.querySelector('input');
-  const chatbox = document.querySelector('div');
-
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    // Get user input from form
-    const user_input = input.value;
-
-    // Call OpenAI API to generate response
-    fetch('/get_response', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        user_input: user_input
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      // Display response from chatbot
-      chatbox.innerHTML += '<p><strong>You:</strong> ' + user_input + '</p>';
-      chatbox.innerHTML += '<p><strong>Hey Dad:</strong> ' + data.response_text + '</p>';
-
-      // Clear input field
-      input.value = '';
-    });
-  });
-</script>
