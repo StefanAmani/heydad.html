@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hey Dad</title>
+  </head>
+  <body>
+    <h1>Hey Dad</h1>
+    <p>Welcome to Hey Dad, the chatbot designed to help you with the things a dad would.</p>
+    <p>Whether you're looking for advice on changing a tire, grilling the perfect steak, or just need someone to listen, Hey Dad is here for you.</p>
+    <form method="POST">
+      <label for="user_input">Enter your message:</label>
+      <input type="text" id="user_input" name="user_input">
+      <button type="submit">Send</button>
+    </form>
+    {% if response_text %}
+      <div>
+        <p><strong>Hey Dad:</strong> {{ response_text }}</p>
+      </div>
+    {% endif %}
+  </body>
+</html>
+
+<script>
+  const form = document.querySelector('form');
+  const input = document.querySelector('input');
+  const chatbox = document.querySelector('div');
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    // Get user input from form
+    const user_input = input.value;
+
+    // Call OpenAI API to generate response
+    fetch('/get_response', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_input: user_input
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Display response from chatbot
+      chatbox.innerHTML += '<p><strong>You:</strong> ' + user_input + '</p>';
+      chatbox.innerHTML += '<p><strong>Hey Dad:</strong> ' + data.response_text + '</p>';
+
+      // Clear input field
+      input.value = '';
+    });
+  });
+</script>
